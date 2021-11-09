@@ -21,10 +21,75 @@ void setup() {
 
   photo.updatePixels();
   image(photo, 0, 0);
-  image(negative(photo),width/2,0);
-  //image(rotate180(photo),width/2,0); // calls rotate180
-  //image(dark(photo),width/2,0); // calls darken filter
+  //image(Poster(photo), width/2, 0); // calls the Poster filter
+  //image(whiteAndBlack(photo), width/2, 0); // calls white and black filter
+  //image(grayScale(photo),width/2, 0); // calls gray scale
+  //image(negative(photo),width/2, 0); // calls negative
+  //image(rotate180(photo),width/2, 0); // calls rotate180
+  //image(dark(photo),width/2, 0); // calls darken filter
 }
+
+PImage Poster(PImage org) {
+  PImage result = createImage(org.width, org.height, RGB);
+  result.loadPixels();
+
+  for (int i = 0; i < org.pixels.length; i++) { // might be right as is.
+    color c = org.pixels[i];
+    float r = red(c);
+    float g = green(c);
+    float b = blue(c);
+    
+    int newR = (int)(r / 32) * 32;
+    int newG = (int)(r / 32) * 32;    
+    int newB = (int)(r / 32) * 32;    
+    
+    result.pixels[i] = color(newR, newG, newB);
+  }
+
+  result.updatePixels();
+  return result;
+}
+
+
+//Returns the White and Black verison of the Image that is passes in.
+PImage whiteAndBlack(PImage org) {
+  PImage result = createImage(org.width, org.height, RGB);
+  result.loadPixels();
+
+  for (int i = 0; i < org.pixels.length; i++) { // might be right as is.
+    color c = org.pixels[i];
+    float r = red(c);
+    float g = green(c);
+    float b = blue(c);
+    if ((r+g+b/3) >= 128) { // closer to white
+      result.pixels[i] = color(255);
+    } else { // closer to black
+      result.pixels[i] = color(0);
+    }
+  }
+
+  result.updatePixels();
+  return result;
+}
+
+//Returns the grayScale of the Image that is passes in.
+//But taking the avg of the r,g,b values
+PImage grayScale(PImage org) {
+  PImage result = createImage(org.width, org.height, RGB);
+  result.loadPixels();
+
+  for (int i = 0; i < org.pixels.length; i++) {
+    color c = org.pixels[i];
+    float r = red(c);
+    float g = green(c);
+    float b = blue(c);
+    result.pixels[i] = color((r+g+b)/3);
+  }
+
+  result.updatePixels();
+  return result;
+}
+
 
 
 //Returns the negtaive of the Image that is passes in.
