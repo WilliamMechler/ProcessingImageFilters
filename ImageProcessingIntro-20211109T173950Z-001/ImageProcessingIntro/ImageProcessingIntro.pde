@@ -58,15 +58,13 @@ void gallery(){
 PImage rotateRight(PImage org) {
   PImage result = createImage(org.height, org.width, RGB);
   result.loadPixels();
-  for (int h = 0; h < result.height; h++) {
-    for (int w = 0; w< result.width; w++) {
-      //should be fine
-      int Rcurr = (h*result.height) + (w); //current height by width | row by col
-      //fix probs
-      int OrgGet = (w*org.width) + (h); // where in the org to get for Rcurr
-      result.pixels[Rcurr] = org.pixels[OrgGet];
+  for (int i = 0; i < result.pixels.length; i++) {
+      
+      int row = i % result.width; // both are from the result's row and col
+      int col = i / result.width;
+      result.pixels[i] = org.pixels[(col + (row * result.height))];
     }
-  }
+  
 
   result.updatePixels();
   return result;
