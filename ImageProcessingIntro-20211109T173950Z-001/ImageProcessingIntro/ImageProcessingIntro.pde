@@ -1,7 +1,8 @@
 PImage photo;
 void settings() {
-  photo = loadImage("cat.jpg");
-  size(2*photo.width, photo.height);
+  photo = loadImage("jello.jpg");
+  size(3 * photo.width, 2 * photo.height + max(photo.width, photo.height));
+
 }  
 
 void setup() {
@@ -18,10 +19,14 @@ void setup() {
   //upper-left pixel get and set are easier to use but are more taxing on the computer
   //photo.set(0,0,color(255,0,0));
 
-
-  photo.updatePixels();
-  image(photo, 0, 0);
-  //image(Poster(photo), width/2, 0); // calls the Poster filter
+ gallery();
+  //photo.updatePixels();
+  //image(photo, 0, 0);
+  //image(brighten(photo, 2), width/2, 0); // calls brightn
+  //image(posterize(photo, 10), width/2, 0); // calls the Poster filter
+  //image(negative(photo),width/2, 0); // calls negative
+  //image(yellowScale(photo), width/2, 0);
+  //image(redAndWhite(photo, 175), width/2, 0);
   //image(whiteAndBlack(photo), width/2, 0); // calls white and black filter
   //image(grayScale(photo),width/2, 0); // calls gray scale
   //image(negative(photo),width/2, 0); // calls negative
@@ -29,7 +34,115 @@ void setup() {
   //image(dark(photo),width/2, 0); // calls darken filter
 }
 
-PImage Poster(PImage org) {
+//Use mouse location to set value in a or many filters
+void mouseMoved(){
+  float factorBright = map(mouseX, 0, width, 0, 10);
+  float factorPost = map(mouseX, 0, width, 1, 255);
+  float factorRed = map(mouseX, 0, width, 0, 255);
+  image(brighten(photo, factorBright), width/3, 0);
+  image(posterize(photo, (int)factorPost), 0, photo.height);
+  image(redAndWhite(photo, (int)factorRed), photo.width*2, photo.height);
+}
+
+void gallery(){
+  photo.updatePixels();
+  image(photo, 0, 0);
+  image(negative(photo), photo.width*2, 0);
+  image(yellowScale(photo), photo.width,  photo.height);
+  image(rotateRight(photo), 0,  photo.height*2);
+  image(shrink(photo), photo.width,  photo.height*2);
+  //image(surprise(photo), photo.width*2,  photo.height*2);
+}
+
+//Rotates the image 90 degrees to the right
+PImage rotateRight(PImage org) {
+  PImage result = createImage(org.height, org.width, RGB);
+  result.loadPixels();
+  for (int h = 0; h < result.height; h++) {
+    for (int w = 0; w< result.width; w++) {
+      //should be fine
+      int Rcurr = (h*result.height) + (w); //current height by width | row by col
+      //fix probs
+      int OrgGet = (w*org.width) + (h); // where in the org to get for Rcurr
+      result.pixels[Rcurr] = org.pixels[OrgGet];
+    }
+  }
+
+  result.updatePixels();
+  return result;
+}
+
+
+//shrink org by 1/2. IE height/2 and width/2;
+PImage shrink(PImage org) {
+  PImage result = createImage(org.width/2, org.height/2, RGB);
+  result.loadPixels();
+  int count = 0;
+  for (int i = 0; i < result.pixels.length; i++) {
+    result.pixels[i] = org.pixels[i*4];
+}
+
+  result.updatePixels();
+  return result;
+}
+
+
+PImage redAndWhite(PImage org, int threshold) {
+  PImage result = createImage(org.width, org.height, RGB);
+  result.loadPixels();
+
+  for (int i = 0; i < org.pixels.length; i++) { // might be right as is.
+    color c = org.pixels[i];
+    float r = red(c);
+    float g = green(c);
+    float b = blue(c);
+    if ((r+g+b/3) >= threshold) { // bigger than or equal to threshold = white
+      result.pixels[i] = color(255);
+    } else { // less than threshold = red
+      result.pixels[i] = color(255,0,0);
+    }
+  }
+
+  result.updatePixels();
+  return result;
+}
+
+PImage yellowScale(PImage org) {
+  PImage result = createImage(org.width, org.height, RGB);
+  result.loadPixels();
+
+  for (int i = 0; i < org.pixels.length; i++) {
+    color c = org.pixels[i];
+    float r = red(c);
+    float g = green(c);
+    float b = blue(c);
+    float avg = (r+g+b)/3;
+    result.pixels[i] = color(avg, avg, 0);
+  }
+
+  result.updatePixels();
+  return result;
+}
+
+
+PImage brighten(PImage org, float factor) {
+  PImage result = createImage(org.width, org.height, RGB);
+  result.loadPixels();
+
+  for (int i = 0; i < org.pixels.length; i++) {
+    color c = org.pixels[i];
+    float r = red(c);
+    float g = green(c);
+    float b = blue(c);
+    result.pixels[i] = color(r*factor, g*factor, b*factor);
+  }
+
+  result.updatePixels();
+  return result;
+}
+
+
+PImage posterize(PImage org, int multiple) {
   PImage result = createImage(org.width, org.height, RGB);
   result.loadPixels();
 
@@ -39,9 +152,9 @@ PImage Poster(PImage org) {
     float g = green(c);
     float b = blue(c);
     
-    int newR = (int)(r / 32) * 32;
-    int newG = (int)(r / 32) * 32;    
-    int newB = (int)(r / 32) * 32;    
+    int newR = (int)(r / multiple) * multiple;
+    int newG = (int)(g / multiple) * multiple;    
+    int newB = (int)(b / multiple) * multiple;    
     
     result.pixels[i] = color(newR, newG, newB);
   }
@@ -102,7 +215,7 @@ PImage negative(PImage org) {
     float r = red(c);
     float g = green(c);
     float b = blue(c);
-    result.pixels[i] = color(255 - r, 255 - g, 255 - b);
+    result.pixels[i] = color(abs(255 - r), abs(255 - g), abs(255 - b));
   }
 
   result.updatePixels();
@@ -157,4 +270,7 @@ void randomCicles() {
   }
 
   photo.updatePixels();
+}
+
+void draw(){ // literally here just so the mouse move works
 }
