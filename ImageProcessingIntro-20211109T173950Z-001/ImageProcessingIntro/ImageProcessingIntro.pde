@@ -58,14 +58,12 @@ void gallery(){
 PImage rotateRight(PImage org) {
   PImage result = createImage(org.height, org.width, RGB);
   result.loadPixels();
-  for (int i = 0; i < result.pixels.length; i++) {
-      
-      int row = i % result.width; // both are from the result's row and col
-      int col = i / result.width;
-      result.pixels[i] = org.pixels[(col + (row * result.height))];
-    }
-  
 
+  for (int x = 0; x < result.width; x++) {
+   for (int y = 0; y < result.height; y++) {
+      result.set(x, y, org.get(y, org.height-1 - x));
+   }
+}
   result.updatePixels();
   return result;
 }
@@ -75,9 +73,12 @@ PImage rotateRight(PImage org) {
 PImage shrink(PImage org) {
   PImage result = createImage(org.width/2, org.height/2, RGB);
   result.loadPixels();
-  int count = 0;
+  int row = 0;
+  int col = 0;
   for (int i = 0; i < result.pixels.length; i++) {
-    result.pixels[i] = org.pixels[i*4];
+    row = i % result.height;
+    col = i / result.width;
+    result.pixels[i] = org.pixels[(row+col)];
 }
 
   result.updatePixels();
